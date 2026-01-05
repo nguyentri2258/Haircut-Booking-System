@@ -1,0 +1,36 @@
+# Environment
+.env*
+/auth.json
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build assets
+/public/build
+/public/hot
+
+# Storage & cache
+/storage/*.key
+/storage/framework/*
+/storage/logs/*
+/storage/debugbar
+
+# PHPUnit
+/.phpunit.cache
+.phpunit.result.cache
+
+# IDE / OS
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# Logs
+npm-debug.log
+yarn-error.log
