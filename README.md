@@ -28,30 +28,30 @@ Frontend:
 - JavaScript
 
 ## Installation
-1. Clone the repository	
+1. Clone the repository:
 	git clone https://github.com/your-username/your-repo.git
 	cd your-repo
 
-2. Install PHP dependencies
+2. Install PHP dependencies:
 	composer install
 
-3. Create environment file and generate app key
+3. Create environment file and generate app key:
 	cp .env.example .env
 	php artisan key:generate
 
-4. Configure database in .env
+4. Configure database in .env:
 	DB_DATABASE=your_database
 	DB_USERNAME=your_username
 	DB_PASSWORD=your_password
 
-5.Run migrations and seeders
+5. Run migrations and seeders:
 	php artisan migrate:fresh --seed
 
-6. Install and build frontend assets
+6. Install and build frontend assets:
 	npm install
 	npm run dev
 
-7. Start the development server
+7. Start the development server:
 	php artisan serve
 
 ## Database & Seeder
