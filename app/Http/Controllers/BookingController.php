@@ -45,16 +45,25 @@ class BookingController extends Controller
         }
         
         $data = $request->validate([
-            "name" => "required|string|max:255",
-            "phone" => "required|string|min:10",
-            "email" => "required|email|max:255",
-            "address_id" => "required|exists:addresses,id",
-            "service_id" => "nullable|array",
+            "name" => "bail|required|string|max:255",
+            "phone" => "bail|required|string|min:10",
+            "email" => "bail|required|email|max:255",
+            "address_id" => "bail|required|exists:addresses,id",
+            "service_id" => "bail|required|array|min:1|distinct",
             "service_id.*" => "exists:services,id",
-            "user_id" => "required|string",
-            "date" => "required|date",
-            "time" => "required|string",
+            "date" => "bail|required|date",
+            "user_id" => "bail|required|string",     
+            "time" => "bail|required|string",
             "notes" => "nullable|string"
+        ],[
+            "name.required" => "Vui lòng nhập Tên",
+            "phone.required" => "Vui lòng nhập Số điện thoại",
+            "email.required" => "Vui lòng nhập Email",
+            "address_id.required" => "Vui lòng chọn chi nhánh",
+            "service_id.required" => "Vui lòng chọn dịch vụ",
+            "date.required" => "Vui lòng chọn ngày",
+            "user_id.required" => "Vui lòng chọn stylist",
+            "time.required" => "Vui lòng chọn giờ",
         ]);
 
         if ($data['user_id'] === 'auto') {
@@ -88,9 +97,7 @@ class BookingController extends Controller
             'status' => 'confirmed'
         ]);
 
-        if (!empty($data['service_id'])) {
-            $booking->services()->attach($data['service_id']);
-        }
+        $booking->services()->attach($data['service_id']);
 
         session()->forget('booking_verified');
 

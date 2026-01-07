@@ -27,7 +27,7 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="address_id">Địa chỉ</label>
-                                <select name="address_id" id="address_id" class="form-control" required>
+                                <select name="address_id" id="address_id" class="form-control">
                                     <option value="">Chọn địa chỉ</option>
                                     @foreach ($addresses as $address)
                                         <option value="{{ $address->id }}" {{ old('address_id') == $address->id ? 'selected' : '' }}>{{ $address->name }}</option>
@@ -54,7 +54,7 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="user_id">Stylist</label>
-                                <select name="user_id" id="user_id" class="form-control d-none" required>
+                                <select name="user_id" id="user_id" class="form-control d-none">
                                     <option value="">Chọn thợ làm tóc</option>
                                     <option value="auto">Để chúng tôi chọn cho bạn</option>
                                 </select>
@@ -63,7 +63,7 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="time">Chọn giờ</label>
-                                <select name="time" id="time_of_day" class="form-control" required>
+                                <select name="time" id="time_of_day" class="form-control">
                                     <option value="">Chọn giờ</option>
                                 </select>
                                 @error('time') <small class="text-danger">{{ $message }}</small> @enderror
@@ -73,7 +73,7 @@
                                 <input type="text" name="notes" id="notes" class="form-control" placeholder="Ghi chú" value="{{ old('notes') }}">
                             </div>
                             <div class="d-grid">
-                                <button type="submit" id="submit-btn" class="btn btn-dark btn-block">Xác nhận</button>
+                                <button type="button" id="submit-btn" class="btn btn-dark btn-block">Xác nhận</button>
                             </div>
                         </form>
                     </div>

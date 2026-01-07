@@ -7,22 +7,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!form || !modalEl || !submitBtn) 
         return; 
     
+    form.addEventListener('submit', e => e.preventDefault());
+
     const modal = new bootstrap.Modal(modalEl); 
     
     let verified = false; 
     let submitting = false; 
-    
+
     submitBtn.addEventListener('click', function (e) {
-        if (verified) return;
+        if (verified || submitting) return;
 
         e.preventDefault();
 
         if (!form.checkValidity()) {
-            form.reportValidity(); // hiện lỗi ngay dưới input
+            form.reportValidity();
             return;
         }
 
-        // 🔥 RESET STATE SERVER TRƯỚC KHI GỬI
+        if (!emailInput.value) {
+            alert('Vui lòng nhập email trước');
+            return;
+        }
+        
+        submitting = true;
+
         fetch('/email/reset-otp', {
             method: 'POST',
             headers: {
@@ -30,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .querySelector('meta[name="csrf-token"]').content
             }
         }).finally(() => {
+            submitting = false;
             sendOtp(emailInput.value);
             modal.show();
             startOtpCountdown();
