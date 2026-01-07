@@ -1,193 +1,141 @@
-document.addEventListener('DOMContentLoaded', () => { 
-    const form = document.getElementById('bookingForm'); 
-    const emailInput = document.getElementById('email'); 
-    const modalEl = document.getElementById('emailVerificationModal'); 
-    const submitBtn = document.getElementById('submit-btn'); 
-    
-    if (!form || !modalEl || !submitBtn) 
-        return; 
-    
-    form.addEventListener('submit', e => e.preventDefault());
+document.addEventListener('DOMContentLoaded', () => {
+    const $ = id => document.getElementById(id);
 
-    const modal = new bootstrap.Modal(modalEl); 
-    
-    let verified = false; 
-    let submitting = false; 
+    const els = {
+        form: $('bookingForm'),
+        email: $('email'),
+        modal: $('emailVerificationModal'),
+        submitBtn: $('submit-btn'),
+        otp: $('otp-code'),
+        verifyOtpBtn: $('verify-otp-btn'),
+        resendBtn: $('otpResendBtn'),
+        countdown: $('otpCountdown'),
+        countdownText: $('otpCountdownText')
+    };
 
-    submitBtn.addEventListener('click', function (e) {
+    if (!els.form || !els.modal || !els.submitBtn) return;
+
+    const modal = new bootstrap.Modal(els.modal);
+
+    let verified = false;
+    let submitting = false;
+
+    const required = {
+        name: 'Vui lòng điền tên',
+        phone: 'Vui lòng điền số điện thoại',
+        email: 'Vui lòng điền email',
+        address_id: 'Vui lòng chọn chi nhánh',
+        service_id: 'Vui lòng chọn dịch vụ',
+        date: 'Vui lòng chọn ngày',
+        user_id: 'Vui lòng chọn stylist',
+        time_of_day: 'Vui lòng chọn giờ'
+    };
+
+    function post(url, data = {}) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(r => r.json());
+    }
+
+    function validate() {
+        document.querySelectorAll('.client-error').forEach(e => e.remove());
+        let ok = true;
+
+        Object.entries(required).forEach(([id, msg]) => {
+            const el = $(id);
+            if (!el || !el.value.trim()) {
+                const small = document.createElement('small');
+                small.className = 'text-danger client-error';
+                small.innerText = msg;
+                el.closest('.form-group').appendChild(small);
+                ok = false;
+            }
+        });
+
+        return ok;
+    }
+
+    els.submitBtn.addEventListener('click', () => {
         if (verified || submitting) return;
 
-        e.preventDefault();
+        if (!validate()) return;
 
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        if (!emailInput.value) {
-            alert('Vui lòng nhập email trước');
-            return;
-        }
-        
         submitting = true;
 
-        fetch('/email/reset-otp', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document
-                    .querySelector('meta[name="csrf-token"]').content
-            }
-        }).finally(() => {
-            submitting = false;
-            sendOtp(emailInput.value);
-            modal.show();
-            startOtpCountdown();
-        });
+        post('/email/reset-otp')
+            .finally(() => {
+                submitting = false;
+                sendOtp();
+                startCountdown();
+                modal.show();
+            });
     });
 
-    
-    function sendOtp(email) {
-        return fetch('/email/send-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document
-                    .querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ email })
-        })
-        .then(async res => {
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message);
-            return data;
+    function sendOtp() {
+        return post('/email/send-code', { email: els.email.value });
+    }
+
+    function verifyOtp(code) {
+        return post('/email/verify-otp', {
+            email: els.email.value,
+            code
         });
     }
 
-    
-    window.bookingEmailVerified = function (code) { 
-        fetch('/email/verify-otp', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 
-                'X-CSRF-TOKEN': document 
-                .querySelector('meta[name="csrf-token"]').content 
-            }, 
-            body: JSON.stringify({ email: emailInput.value, code: code }) 
-        }) 
-        .then(res => { 
-            if (!res.ok) throw new Error(); 
-            return res.json(); 
-        }) 
-        .then(() => { 
-            verified = true; 
-            modal.hide(); 
-            fetch(form.action, { 
-                method: 'POST', 
-                body: new FormData(form), 
-                headers: { 
-                    'X-CSRF-TOKEN': document 
-                    .querySelector('meta[name="csrf-token"]').content, 
-                    'Accept': 'application/json' 
-                } 
-            }) 
-            .then(r => { 
-                if (!r.ok) throw new Error(); 
-                return r.json(); 
-            }) 
-            .then(data => { 
-                if (!data.success) throw new Error();
-                window.showBookingSuccess(data); 
-            }) 
-            .catch(() => { 
-                alert('Có lỗi khi xác nhận hoặc đặt lịch'); 
-            }) 
-            .finally(() => { 
-                submitting = false; 
-            }); 
-        }) 
-        .catch(() => { 
-            submitting = false; 
-            alert('Mã xác nhận không đúng hoặc đã hết hạn'); 
-        }); 
-    }; 
-    
-    const otpInput = document.getElementById('otp-code'); 
-    const verifyBtn = document.getElementById('verify-otp-btn'); 
-    if (verifyBtn && otpInput) { 
-        verifyBtn.addEventListener('click', () => { 
-            const code = otpInput.value.trim(); 
-            if (code.length !== 6) { 
-                alert('Vui lòng nhập đủ 6 chữ số'); 
-                return; 
-            } 
-            bookingEmailVerified(code); 
-        }); 
-    } 
-    
-    let otpTimer = null; 
-    let otpSeconds = 60; 
-    function startOtpCountdown() { 
-        const countdownText = document.getElementById('otpCountdownText'); 
-        const countdownEl = document.getElementById('otpCountdown'); 
-        const resendBtn = document.getElementById('otpResendBtn'); 
-        
-        if (!countdownEl || !resendBtn) 
-            return; 
-        
-        otpSeconds = 60; 
-        countdownEl.textContent = otpSeconds; 
-        countdownText.classList.remove('d-none'); 
-        resendBtn.classList.add('d-none'); 
-        
-        if (otpTimer) 
-            clearInterval(otpTimer); 
-        
-        otpTimer = setInterval(() => { 
-            otpSeconds--; 
-            countdownEl.textContent = otpSeconds; 
-            if (otpSeconds <= 0) { 
-                clearInterval(otpTimer); 
-                countdownText.classList.add('d-none'); 
-                resendBtn.classList.remove('d-none'); 
-            } 
-        }, 1000); 
-    } 
-    
-    const resendBtn = document.getElementById('otpResendBtn'); 
-    
-    if (resendBtn) { 
-        resendBtn.addEventListener('click', () => { 
-            const email = emailInput.value; 
-            if (!email) return; 
-            sendOtp(email); 
-            startOtpCountdown(); 
-        }); 
-    } 
-    
-    function resetOtpState() { 
-        verified = false; 
-        submitting = false; 
+    window.bookingEmailVerified = code => {
+        verifyOtp(code)
+            .then(() => {
+                verified = true;
+                modal.hide();
+                return fetch(els.form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(els.form)
+                });
+            })
+            .then(r => r.json())
+            .then(d => window.showBookingSuccess(d))
+            .catch(() => alert('Có lỗi xảy ra'))
+            .finally(() => submitting = false);
+    };
 
-        const otpInput = document.getElementById('otp-code'); 
-        const otpError = document.getElementById('otpError'); 
-        
-        if (otpInput) otpInput.value = ''; 
-        if (otpError) otpError.classList.add('d-none'); 
-        
-        const resendBtn = document.getElementById('otpResendBtn'); 
-        const countdownText = document.getElementById('otpCountdownText'); 
+    els.verifyOtpBtn?.addEventListener('click', () => {
+        const code = els.otp.value.trim();
+        if (code.length !== 6) return alert('Nhập đủ 6 số');
+        bookingEmailVerified(code);
+    });
 
-        if (resendBtn) resendBtn.classList.add('d-none'); 
-        if (countdownText) countdownText.classList.remove('d-none'); 
-        
-        const modalEl = document.getElementById('emailVerificationModal'); 
-        const modalInstance = bootstrap.Modal.getInstance(modalEl); 
-        
-        modalInstance?.hide(); 
-    } 
-    
-    document.getElementById('closeOtpBtn')?.addEventListener('click', () => { 
-        if (confirm('Bạn có chắc muốn huỷ xác nhận email?')) { 
-            resetOtpState(); 
-        } 
-    }); 
+    function startCountdown() {
+        let s = 60;
+        els.countdownText?.classList.remove('d-none');
+        els.resendBtn?.classList.add('d-none');
+
+        const timer = setInterval(() => {
+            s--;
+            els.countdown.textContent = s;
+
+            if (s <= 0) {
+                clearInterval(timer);
+                els.countdownText?.classList.add('d-none');
+                els.resendBtn?.classList.remove('d-none');
+            }
+        }, 1000);
+    }
+
+    els.resendBtn?.addEventListener('click', () => {
+        if (!els.email.value) return;
+        sendOtp();
+        startCountdown();
+    });
+
+    $('closeOtpBtn')?.addEventListener('click', () => modal.hide());
 });

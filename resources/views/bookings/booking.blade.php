@@ -49,7 +49,7 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="date">Ngày</label>
-                                <input type="text" name="date" id="date" class="form-control" value="{{ old('date') }}" placeholder="Chọn ngày" readonly>
+                                <input type="text" name="date" id="date" class="form-control" value="{{ old('date') }}" placeholder="Chọn ngày">
                                 @error('date') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
                             <div class="form-group mb-3">
