@@ -25,14 +25,14 @@ class UserSeeder extends Seeder
             ],
             [
                 'email' => 'manager1@gmail.com',
-                'name' => 'Manager CN1',
+                'name' => 'Manager 1',
                 'password' => Hash::make('Manager1@'),
                 'role' => 'manager',
                 'address_id' => $cn1?->id,
             ],
             [
                 'email' => 'manager2@gmail.com',
-                'name' => 'Manager CN2',
+                'name' => 'Manager 2',
                 'password' => Hash::make('Manager2@'),
                 'role' => 'manager',
                 'address_id' => $cn2?->id,

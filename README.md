@@ -87,6 +87,17 @@ Seeders respect real business rules such as:
 - Manager: Manage staff within assigned branch
 - Staff: View own needed information
 
+## List of Accounts
+| Name          | Email                    | Password    |
+|----------------|--------------------------|-------------|
+| System Owner   | owner123@gmail.com       | Owner123@   |
+| Manager 1      | manager1@gmail.com       | Manager1@   |
+| Manager 2      | manager2@gmail.com       | Manager2@   |
+| Staff 1        | staff1@gmail.com         | Staff1@     |
+| Staff 2        | staff2@gmail.com         | Staff2@     |
+| Staff 3        | staff3@gmail.com         | Staff3@     |
+| Staff 4        | staff4@gmail.com         | Staff4@     |
+
 ## Notes for Recruiters
 - All core business logic is handled on the backend
 - Seeders allow the system to be tested immediately after setup
