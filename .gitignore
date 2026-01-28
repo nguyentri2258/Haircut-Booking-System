@@ -7,7 +7,6 @@
 /vendor
 
 # Build assets
-/public/build
 /public/hot
 
 # Storage & cache
