@@ -19,13 +19,13 @@
                 url('/images/hinh1.jpg') center / cover no-repeat fixed;
         }
     </style>
-    @vite(['resources/js/app.js', 'resources/css/default.css'])
+    @vite(['resources/js/app.js', 'resources/css/app.css'])
 </head>
-<body>  
+<body>
     @yield('content')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-    @stack('scripts')  
+    @stack('scripts')
 </body>
 </html>

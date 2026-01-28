@@ -18,14 +18,21 @@ The system supports multiple branches, staff availability management, holidays, 
 ## Tech Stack
 Backend:
 - Laravel 12.x
-- PHP >= 8.2
-
-Database:
-- MySQL
+- PHP 8.2 (Docker – PHP-FPM)
 
 Frontend:
 - Blade Template
 - JavaScript
+- Vite
+
+Database:
+- MySQL 8.0 (Docker)
+
+Web Server:
+- Nginx (Docker)
+
+Development Tools:
+- Docker & Docker Compose
 
 ## Installation
 1. Clone the repository:
@@ -33,33 +40,32 @@ Frontend:
 	git clone https://github.com/your-username/your-repo.git
 	cd your-repo
 
-2. Install PHP dependencies:
-	```bash
-	composer install
-
-3. Create environment file and generate app key:
+2. Create environment file:
 	```bash
 	cp .env.example .env
-	php artisan key:generate
 
-4. Configure database in .env:
+3. Configure database in .env:
 	```bash
 	DB_DATABASE=your_database
 	DB_USERNAME=your_username
 	DB_PASSWORD=your_password
+    DB_ROOT_PASSWORD=your_root_password
 
-5. Run migrations and seeders:
+4. Build & start Docker containers:
 	```bash
-	php artisan migrate:fresh --seed
+	docker compose up -d --build
 
-6. Install and build frontend assets:
+5. Generate application key:
 	```bash
-	npm install
-	npm run dev
+	docker compose exec app php artisan key:generate
 
-7. Start the development server:
+6. Run migrations and seeders:
 	```bash
-	php artisan serve
+	docker compose exec app php artisan migrate:fresh --seed
+
+7. Access the application:
+
+- Web app: http://localhost:8000
 
 ## Database & Seeder
 The project includes seeders for:

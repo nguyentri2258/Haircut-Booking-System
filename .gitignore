@@ -45,3 +45,6 @@ Homestead.yaml
 # Logs
 npm-debug.log
 yarn-error.log
+
+# Docker
+docker/mysql/data
