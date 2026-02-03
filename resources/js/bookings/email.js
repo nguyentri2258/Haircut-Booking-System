@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyOtpBtn: $('verify-otp-btn'),
         resendBtn: $('otpResendBtn'),
         countdown: $('otpCountdown'),
-        countdownText: $('otpCountdownText')
+        countdownText: $('otpCountdownText'),
+        otpError: $('otpError')
     };
 
     if (!els.form || !els.modal || !els.submitBtn) return;
@@ -40,7 +41,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Accept': 'application/json'
             },
             body: JSON.stringify(data)
-        }).then(r => r.json());
+        }).then(async r => {
+            const json = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                const err = new Error(json.message || 'Request failed');
+                err.status = r.status;
+                err.data = json;
+                throw err;
+            }
+            return json;
+        });
+    }
+
+    function showOtpError(msg) {
+        if (!els.otpError) return;
+        if (!msg) {
+            els.otpError.classList.add('d-none');
+            els.otpError.textContent = '';
+            return;
+        }
+        els.otpError.textContent = msg;
+        els.otpError.classList.remove('d-none');
     }
 
     function validate() {
@@ -67,14 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!validate()) return;
 
         submitting = true;
+        showOtpError('');
 
         post('/email/reset-otp')
-            .finally(() => {
-                submitting = false;
-                sendOtp();
+            .then(() => sendOtp())
+            .then(() => {
                 startCountdown();
                 modal.show();
-            });
+            })
+            .catch(err => showOtpError(err.message || 'Co loi xay ra'))
+            .finally(() => { submitting = false; });
     });
 
     function sendOtp() {
@@ -89,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.bookingEmailVerified = code => {
+        showOtpError('');
         verifyOtp(code)
             .then(() => {
                 verified = true;
@@ -104,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(r => r.json())
             .then(d => window.showBookingSuccess(d))
-            .catch(() => alert('Có lỗi xảy ra'))
+            .catch(err => showOtpError(err.message || 'Co loi xay ra'))
             .finally(() => submitting = false);
     };
 
@@ -118,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let s = 60;
         els.countdownText?.classList.remove('d-none');
         els.resendBtn?.classList.add('d-none');
+        if (els.countdown) els.countdown.textContent = s;
 
         const timer = setInterval(() => {
             s--;
@@ -133,9 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     els.resendBtn?.addEventListener('click', () => {
         if (!els.email.value) return;
-        sendOtp();
-        startCountdown();
+        showOtpError('');
+        sendOtp()
+            .then(() => startCountdown())
+            .catch(err => showOtpError(err.message || 'Có lỗi xảy ra'));
     });
 
     $('closeOtpBtn')?.addEventListener('click', () => modal.hide());
 });
+
