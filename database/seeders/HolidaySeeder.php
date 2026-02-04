@@ -50,7 +50,13 @@ class HolidaySeeder extends Seeder
         ];
 
         foreach ($holidays as $holiday) {
-            Holiday::create($holiday);
+            Holiday::updateOrCreate(
+                ['date' => $holiday['date']],
+                [
+                    'note' => $holiday['note'],
+                    'address_id' => $holiday['address_id'],
+                ]
+            );
         }
     }
 }

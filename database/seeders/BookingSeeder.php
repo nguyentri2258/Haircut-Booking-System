@@ -13,6 +13,10 @@ class BookingSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Booking::exists()) {
+            return;
+        }
+
         $faker = Faker::create('vi_VN');
         $services = Service::pluck('id')->toArray();
 

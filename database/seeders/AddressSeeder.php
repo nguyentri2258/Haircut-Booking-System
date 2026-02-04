@@ -24,7 +24,13 @@ class AddressSeeder extends Seeder
         ];
 
         foreach ($addresses as $address) {
-            Address::create($address);
+            Address::updateOrCreate(
+                ['name' => $address['name']],
+                [
+                    'address' => $address['address'],
+                    'note' => $address['note'],
+                ]
+            );
         }
     }
 }

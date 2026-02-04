@@ -12,6 +12,10 @@ class AvailabilitySeeder extends Seeder
 {
     public function run(): void
     {
+        if (Availability::exists()) {
+            return;
+        }
+
         $users = User::whereIn('name', [
             'Staff 1', 'Staff 2', 'Staff 3', 'Staff 4'
         ])->get();
