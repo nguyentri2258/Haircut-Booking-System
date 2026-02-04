@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use App\Models\Booking;
 use App\Models\Availability;
 use App\Models\Service;
-use Faker\Factory as Faker;
 use Carbon\Carbon;
 
 class BookingSeeder extends Seeder
@@ -17,27 +16,39 @@ class BookingSeeder extends Seeder
             return;
         }
 
-        $faker = Faker::create('vi_VN');
         $services = Service::pluck('id')->toArray();
 
-        $availabilities = Availability::inRandomOrder()->take(10)->get();
+        if (empty($services)) {
+            return;
+        }
+
+        $availabilities = Availability::inRandomOrder()
+            ->take(10)
+            ->get();
 
         foreach ($availabilities as $availability) {
 
-            $date = Carbon::parse($availability->available_date)->format('Y-m-d');
-            $time = Carbon::parse($availability->time_of_day)->format('H:i');
+            $bookingDateTime = Carbon::parse(
+                $availability->available_date . ' ' . $availability->time_of_day
+            );
 
-            $bookingDateTime = Carbon::parse("$date $time");
+            if (
+                Booking::where('user_id', $availability->user_id)
+                    ->where('date', $bookingDateTime)
+                    ->exists()
+            ) {
+                continue;
+            }
 
             $booking = Booking::create([
-                'name' => $faker->name(),
-                'phone' => '09' . rand(10000000, 99999999),
-                'email' => $faker->safeEmail(),
+                'name'       => 'Demo Customer',
+                'phone'      => '0900000000',
+                'email'      => 'demo@booking.test',
                 'address_id' => $availability->user->address_id,
-                'user_id' => $availability->user_id,
-                'date' => $bookingDateTime,
-                'notes' => $faker->boolean(30) ? $faker->sentence() : null,
-                'status' => 'confirmed',
+                'user_id'    => $availability->user_id,
+                'date'       => $bookingDateTime,
+                'notes'      => null,
+                'status'     => 'confirmed',
             ]);
 
             $booking->services()->attach(
