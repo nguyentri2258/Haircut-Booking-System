@@ -1,6 +1,12 @@
 # Hair Salon Booking System
 A web-based booking and staff scheduling system for hair salons, built with Laravel.
 
+## Live Demo
+Production (Render – Docker):
+https://haircut-booking-system.onrender.com
+
+Note: This project is deployed on Render Free Tier.
+The service may spin down after inactivity, so the first request can take ~30–60 seconds to respond.
 ## Introduction
 This project is a hair salon booking system that allows customers to book services with available staff members based on working schedules.
 The system supports multiple branches, staff availability management, holidays, and service-based bookings.
@@ -109,3 +115,4 @@ Seeders respect real business rules such as:
 - Seeders allow the system to be tested immediately after setup
 - Availability and booking logic follows real salon workflows
 - Mail driver is configured to use log for testing purposes
+- Production uses Render Free Tier (cold start may occur)
