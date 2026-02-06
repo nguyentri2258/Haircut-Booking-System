@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\EmailVerification;
+use Illuminate\Support\Facades\Http;
 
 class EmailVerificationService
 {
@@ -27,5 +28,46 @@ class EmailVerificationService
             ->where('code', $code)
             ->where('expires_at', '>', now())
             ->exists();
+
+        if (! $record) {
+            return false;
+        }
+
+        $record->delete();
+
+        return true;
+    }
+
+    public static function sendOtp(string $email, string $code): void
+    {
+        self::send(
+            $email,
+            'Mã xác nhận đặt lịch',
+            view('emails.otp', [
+                'otp' => $code,
+            ])->render()
+        );
+    }
+
+    protected static function send(
+        string $toEmail,
+        string $subject,
+        string $htmlContent
+    ): void {
+        Http::withHeaders([
+            'api-key' => config('services.brevo.key'),
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->post('https://api.brevo.com/v3/smtp/email', [
+            'sender' => [
+                'email' => config('mail.from.address'),
+                'name'  => config('mail.from.name'),
+            ],
+            'to' => [
+                ['email' => $toEmail],
+            ],
+            'subject' => $subject,
+            'htmlContent' => $htmlContent,
+        ])->throw();
     }
 }
