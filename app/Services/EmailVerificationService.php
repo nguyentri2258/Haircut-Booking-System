@@ -43,7 +43,7 @@ class EmailVerificationService
         self::send(
             $email,
             'Mã xác nhận đặt lịch',
-            view('bookings.email', [
+            view('bookings.otp', [
                 'otp' => $code,
             ])->render()
         );
