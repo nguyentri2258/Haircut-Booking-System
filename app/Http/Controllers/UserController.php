@@ -100,7 +100,13 @@ class UserController extends Controller
         }
 
         $users = $query
-            ->orderByRaw("FIELD(role, 'manager', 'staff')")
+            ->orderByRaw("
+                CASE
+                    WHEN role = 'manager' THEN 1
+                    WHEN role = 'staff' THEN 2
+                    ELSE 3
+                END
+            ")
             ->latest()
             ->get();
 
@@ -189,5 +195,5 @@ class UserController extends Controller
         $user->delete();
 
         return back()->with('success', 'Đã xoá tài khoản');
-    }   
+    }
 }
